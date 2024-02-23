@@ -47,6 +47,15 @@ while True:
         if not smile_status[i]:
             all_smiles = False
 
+        # Draw rectangle around the face
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+        
+    # Display message on frame
+    if all_smiles and len(faces) > 0:
+        cv2.putText(frame, "Your selfie is ready to be captured!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    else:
+        cv2.putText(frame, "Please smile to capture your selfie!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
     # If all faces are smiling, capture the selfie
     if all_smiles and len(faces) > 0:
         time_stamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
@@ -54,14 +63,12 @@ while True:
         folder_path = os.path.join(click_folder, new_folder_name)
         cv2.imwrite(os.path.join(folder_path, file_name), original_frame)
         print("Selfie captured!")
-
-        # Reset smile status for the next round
-        smile_status = {}
     else:
-        print("Smile please")
+        print("Smile Please")
 
     # Display the frame
-    cv2.imshow('cam star', frame)
+    cv2.imshow('Camera Frame', frame)
+    
     if cv2.waitKey(10) == ord('q'):
         break
 
