@@ -18,6 +18,11 @@ new_folder_name = f'clk{len(clk_folders) + 1}'
 # Create a new folder for this run
 os.makedirs(os.path.join(click_folder, new_folder_name))
 
+# Text settings
+font = cv2.FONT_HERSHEY_SIMPLEX
+font_scale = 1
+thickness = 2
+
 # Initialize a dictionary to keep track of smile status for each face
 smile_status = {}
 
@@ -50,11 +55,11 @@ while True:
         # Draw rectangle around the face
         cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
         
-    # Display message on frame
-    if all_smiles and len(faces) > 0:
-        cv2.putText(frame, "Your selfie is ready to be captured!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    else:
-        cv2.putText(frame, "Please smile to capture your selfie!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        # Display message on frame
+        if all_smiles:
+            cv2.putText(frame, "Your selfie is ready to be captured!", (x, y-10), font, font_scale, (0, 255, 0), thickness)
+        else:
+            cv2.putText(frame, "Please smile 😊😊😊 to capture your selfie!", (x, y-10), font, font_scale, (0, 0, 255), thickness)
 
     # If all faces are smiling, capture the selfie
     if all_smiles and len(faces) > 0:
@@ -64,7 +69,7 @@ while True:
         cv2.imwrite(os.path.join(folder_path, file_name), original_frame)
         print("Selfie captured!")
     else:
-        print("Smile Please")
+        print("Smile 😊😊😊 Please")
 
     # Display the frame
     cv2.imshow('Camera Frame', frame)
