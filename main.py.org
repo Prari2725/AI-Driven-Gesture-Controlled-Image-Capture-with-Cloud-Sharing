@@ -1,0 +1,208 @@
+import cv2
+import numpy as np
+from cvzone.HandTrackingModule import HandDetector
+import time
+import os
+from datetime import datetime
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from googleapiclient.http import MediaFileUpload
+from google.auth.transport.requests import Request
+import qrcode
+
+SCOPES = ['https://www.googleapis.com/auth/drive']
+SERVICE_ACCOUNT_FILE = 'service_account.json'
+PARENT_FOLDER_ID = "1QvD0Mf6GplCMz2DGo66yy80eVPG4gWsN"
+
+def authenticate():
+    creds = None
+    try:
+        creds = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+        
+        if creds.expired:
+            creds.refresh(Request())
+
+    except Exception as e:
+        print("An error occurred during authentication:", e)
+
+    return creds
+
+def upload_photo(frame):
+    creds = authenticate()
+    if creds is None:
+        print("Authentication failed.")
+        return
+
+    service = build('drive', 'v3', credentials=creds)
+
+    now = datetime.now()
+    date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+    file_path = 'camera_{}.jpg'.format(date_time)
+    cv2.imwrite(file_path, frame)
+
+    file_metadata = {
+        'name': os.path.basename(file_path),
+        'parents': [PARENT_FOLDER_ID],
+    }
+
+    media = MediaFileUpload(file_path, resumable=True)
+
+    try:
+        file = service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields='id'
+        ).execute()
+        
+        # Set public permission
+        service.permissions().create(
+            fileId=file['id'],
+            body={'type': 'anyone', 'role': 'reader'},
+        ).execute()
+        
+        print("File uploaded successfully. File ID:", file.get('id'))
+        os.remove(file_path)  # Remove the locally saved image after uploading
+        return file.get('id')
+    except Exception as e:
+        print("An error occurred:", e)
+        os.remove(file_path)  # Remove the locally saved image if upload fails
+        return None
+
+def generate_qr_code(content):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(content)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    return img
+
+
+def display_exit_button(frame):
+    cv2.rectangle(frame, (20, 20), (70, 70), (0, 0, 255), -1)
+    cv2.putText(frame, 'EXIT', (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+detector = HandDetector(detectionCon=0.8, maxHands=2)
+video = cv2.VideoCapture(0)
+
+def capture_and_upload_image(timer):
+    prev = time.time()
+    while timer >= 0:
+        ret, frame = video.read()
+        cv2.rectangle(frame, (0, 0), (280, 50), (0, 0, 0), -2, cv2.LINE_AA)
+        cv2.putText(frame, 'Timer : {}'.format(str(timer)), (20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (50, 50, 255), 2)
+        cv2.imshow('frame', frame)
+        cv2.waitKey(100)
+        cur = time.time()
+        if cur - prev > 1:
+            prev = cur
+            timer = timer - 1
+    else:
+        ret, frame = video.read()
+        cv2.imshow('frame', frame)
+        cv2.waitKey(5000)  # Display captured image for 5 seconds
+        uploaded_image_id = upload_photo(frame)  # Upload the captured image to Google Drive
+        if uploaded_image_id:
+            uploaded_image_link = f"https://drive.google.com/uc?id={uploaded_image_id}"
+            qr_img = generate_qr_code(uploaded_image_link)
+            qr_img = qr_img.convert('RGB')  # Convert to RGB format
+            qr_img = np.array(qr_img)  # Convert to numpy array
+            qr_img = cv2.cvtColor(qr_img, cv2.COLOR_RGB2BGR)  # Convert to BGR format
+            message = "Scan QR to download the image"
+            display_text(qr_img, message)
+            cv2.imshow("QR Code", qr_img)
+            display_exit_button(qr_img)
+            start_time = time.time()
+            while time.time() - start_time < 10:  # Display QR code for 5 seconds
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+            cv2.destroyWindow("QR Code")  # Close QR code window after 5 seconds
+        else:
+            print("Failed to upload image to Google Drive")
+        time.sleep(3)  # 10 seconds delay before repeating the procedure
+
+while True:
+    ret, frame = video.read()
+    hands, _ = detector.findHands(frame)
+    if hands:
+        hands1 = hands[0]
+        finger_count = detector.fingersUp(hands1)
+        if finger_count == [0, 1, 0, 0, 0]:
+            capture_and_upload_image(1)
+        elif finger_count == [0, 1, 1, 0, 0]:
+            capture_and_upload_image(2)
+        elif finger_count == [0, 1, 1, 1, 0]:
+            capture_and_upload_image(3)
+        elif finger_count == [0, 1, 1, 1, 1]:
+            capture_and_upload_image(4)
+        elif finger_count == [1, 1, 1, 1, 1]:
+            capture_and_upload_image(5)
+    cv2.imshow('frame', frame)
+    k = cv2.waitKey(1)
+    if k == ord('q'):
+        break
+
+video.release()
+cv2.destroyAllWindows()
+
+
+
+"""
+# code for displaying multiple images in one figure 
+
+#import libraries 
+import cv2 
+from matplotlib import pyplot as plt 
+
+# create figure 
+fig = plt.figure(figsize=(10, 7)) 
+
+# setting values to rows and column variables 
+rows = 2
+columns = 2
+
+# reading images 
+Image1 = cv2.imread('Image1.jpg') 
+Image2 = cv2.imread('Image2.jpg') 
+Image3 = cv2.imread('Image3.jpg') 
+Image4 = cv2.imread('Image4.jpg') 
+
+# Adds a subplot at the 1st position 
+fig.add_subplot(rows, columns, 1) 
+
+# showing image 
+plt.imshow(Image1) 
+plt.axis('off') 
+plt.title("First") 
+
+# Adds a subplot at the 2nd position 
+fig.add_subplot(rows, columns, 2) 
+
+# showing image 
+plt.imshow(Image2) 
+plt.axis('off') 
+plt.title("Second") 
+
+# Adds a subplot at the 3rd position 
+fig.add_subplot(rows, columns, 3) 
+
+# showing image 
+plt.imshow(Image3) 
+plt.axis('off') 
+plt.title("Third") 
+
+# Adds a subplot at the 4th position 
+fig.add_subplot(rows, columns, 4) 
+
+# showing image 
+plt.imshow(Image4) 
+plt.axis('off') 
+plt.title("Fourth") 
+
+
+"""
