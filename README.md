@@ -1,61 +1,65 @@
-# Automatic Selfie
+# 🤳 **Automatic Selfie**
 
-This project uses OpenCV, Google Drive API, and QR code generation to capture and upload images to Google Drive.
+This project uses **OpenCV**, **Google Drive API**, and **QR code generation** to capture and upload images to Google Drive.
 
-## Getting Started
+---
 
-### Prerequisites
+## 🚀 **Getting Started**
 
-- Python 3.x
-- Virtualenv (optional)
+### 🛠️ **Prerequisites**
 
-### Installation
+- 🐍 Python 3.x
+- 📦 Virtualenv (optional)
 
-1. Clone the repository:
+### ⚙️ **Installation**
 
-``` bash
-git clone https://github.com/your-username/your-repo.git
+1. **🔽 Clone the repository:**
+
+   ```bash
+git clone https://github.com/Prari2725/AI-Driven-Gesture-Controlled-Image-Capture-with-Cloud-Sharing.git
 ```
 
-2. Create and activate a virtual environment (optional):
+2. **🌐 Create and activate a virtual environment (optional):**
 
-``` bash
-cd your-repo 
+   ```bash
+   cd your-repo 
 
-python -m  venv .venv
+   python -m venv .venv
 
-source .venv/bin/activate
-```
-3. Install the requirements:
+   source .venv/bin/activate
+   ```
 
-``` bash
-pip install -r requirements.txt
-```
+3. **📦 Install the requirements:**
 
-4. Set up the Google Drive API:
-- Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
-- Enable the Google Drive API for your project.
-- Create a service account and download the JSON key file.
-- Place the JSON key file in the root directory of your project and rename it to `service_account.json`.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-5. Run the main script:
+4. **🔑 Set up the Google Drive API:**
+   - Go to the [Google Cloud Console](https://console.cloud.google.com/) and create a new project.
+   - ✅ Enable the Google Drive API for your project.
+   - 🔒 Create a service account and download the JSON key file.
+   - 📂 Place the JSON key file in the root directory of your project and rename it to `service_account.json`.
 
-```bash 
-python main.py
-```
+5. **▶️ Run the main script:**
 
-## Usage
+   ```bash
+   python main.py
+   ```
 
-1. show your fingers to start capture Timer on the camera frame to capture and upload images.
+---
 
-2. The captured images will be uploaded to the specified Google Drive folder.
+## 🎮 **Usage**
 
-3. A QR code will be generated for each uploaded image.
+1. ✋ **Show your fingers** to start the capture timer on the camera frame.
+2. 📸 The captured images will be uploaded to the specified Google Drive folder.
+3. 🔗 A **QR code** will be generated for each uploaded image.
+4. 🖼️ The QR code images will be displayed side by side with the capture window.
+5. ❌ To exit the program, press `q` on the keyboard.
 
-4. The QR code images will be displayed in a side by side with caputure Window.
+---
 
-5. To exit the program, press 'q' on the keyboard.
+## 📬 **Contact**
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+- **📧 Email**: pragatirpehrkar@gmail.com
+- **🐙 GitHub**: [Prari2725](https://github.com/Prari2725)
