@@ -5,7 +5,7 @@ This project uses **OpenCV**, **Google Drive API**, and **QR code generation** t
 ---
 
 ## 🚀 **Getting Started**
-
+ 
 ### 🛠️ **Prerequisites**
 
 - 🐍 Python 3.x
